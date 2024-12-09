@@ -1,0 +1,39 @@
+{
+  "name": "atlyss-data",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+
+    "parse": "node parse-raw-data.js",
+
+    "parse:trade": "node parse-trade-items",
+    "parse:consumable": "node parse-consumable-items",
+    "parse:equipment": "node parse-equipment-items",
+    "parse:drops": "node parse-drop-tables",
+    "parse:creeps": "node parse-creep-data",
+    "parse:locations": "node parse-locations",
+    "parse:npcs": "node parse-npc-data",
+    "parse:classes": "node parse-classes-data",
+
+    "post:trade": "node post-trade-items",
+    "post:consumable": "node post-consumable-items",
+    "post:equipment": "node post-equipment-items",
+    "post:drops": "node post-loot-tables",
+    "post:creeps": "node post-creeps",
+    "post:locations": "node post-locations",
+    "post:npcs": "node post-npc-data",
+    "post:classes": "node post-classes-data"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "js-yaml": "^4.1.0",
+    "nodemw": "^0.22.0",
+    "prompt": "^1.3.0",
+    "yaml": "^2.6.1"
+  }
+}

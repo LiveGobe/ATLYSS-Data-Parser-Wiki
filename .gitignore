@@ -1,0 +1,8 @@
+/.vscode/
+/node_modules/
+/outdata/
+/luatables/
+/bin/cache.json
+config.js
+GAMEDATA.txt
+gameVersion.json
