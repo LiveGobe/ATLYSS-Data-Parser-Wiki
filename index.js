@@ -1,4 +1,7 @@
 const path = require('path');
+const mw = require("nodemw");
+const compareVersions = require("./bin/compareVersions");
+const version = require("./package.json").version;
 
 // List of parser scripts to run
 const scripts = [
@@ -91,5 +94,16 @@ async function executePostScripts() {
     }
 }
 
-// Run the script execution process
-executeScripts();
+const client = new mw({
+    protocol: "https",
+    server: "atlyss.wiki.gg",
+    path: "/"
+});
+
+client.getArticle("User:LiveGobe/ParserVersion", (err, data) => {
+    if (err) return console.error(err);
+
+    if (data && compareVersions(version, data) < 0) return console.log(`Parser version is outdated (Your version is ${version}, new version is ${data})`);
+    // Run the script execution process
+    executeScripts();
+});
