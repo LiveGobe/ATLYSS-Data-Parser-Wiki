@@ -4,10 +4,12 @@ const findAssetById = require("./bin/findAssetById");
 
 const inputDir = path.join(__dirname, "outdata", "_class");
 const noviceSkillsDir = path.join(__dirname, "outdata", "_skill", "_noviceskills"); // Novice skills directory
+const skillScrollDir = path.join(__dirname, "outdata", "_skill", "00_skillscroll_skills"); // Skill scroll skills directory
 const outputDir = path.join(__dirname, "luatables");
 
 const filesList = fs.readdirSync(inputDir);
-const noviceFilesList = fs.readdirSync(noviceSkillsDir); // Get the list of novice skill files
+const noviceFilesList = fs.readdirSync(noviceSkillsDir); // Get the list of novice skill folders
+const skillScrollFilesList = fs.readdirSync(skillScrollDir); // Get the list of skill scroll folders
 
 let luaTable = "return {\n\t";
 
@@ -137,54 +139,60 @@ luaTable += `["Novice"] = {\n\t\t`;
 luaTable += `name = "Novice",\n\t\t`;
 luaTable += `skills = {\n\t\t\t`;
 
-// Process novice skills
-noviceFilesList.forEach(folder => {
-    // Get all files in the folder
-    const filesInFolder = fs.readdirSync(path.join(noviceSkillsDir, folder));
+// Helper function to process folders and files
+function processSkillFolder(skillFolderPath) {
+    const folders = fs.readdirSync(skillFolderPath);
 
-    // Filter the files to match the pattern "skill_<Skill Name>.json"
-    const skillFiles = filesInFolder.filter(file => /^skill_.*\.json$/.test(file));
+    folders.forEach(folder => {
+        const filesInFolder = fs.readdirSync(path.join(skillFolderPath, folder));
 
-    // If no matching files found, log and skip
-    if (skillFiles.length === 0) {
-        console.log(`No skill files found in folder ${folder}`);
-        return;
-    }
+        // Filter the files to match the pattern "skill_<Skill Name>.json"
+        const skillFiles = filesInFolder.filter(file => /^skill_.*\.json$/.test(file));
 
-    // Process each skill file
-    luaTable += `{\n\t\t\t\t`;
-    skillFiles.forEach(file => {
-        const skillData = require(path.join(noviceSkillsDir, folder, file))[0]?.MonoBehaviour;
-
-        if (!skillData) {
-            console.log(`File ${file} doesn't contain any MonoBehaviour`);
+        if (skillFiles.length === 0) {
+            console.log(`No skill files found in folder ${folder}`);
             return;
         }
 
-        luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
-        luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
-        luaTable += `ranks = {\n\t\t\t\t\t`;
+        skillFiles.forEach(file => {
+            const skillData = require(path.join(skillFolderPath, folder, file))[0]?.MonoBehaviour;
 
-        skillData._skillRanks.forEach((rank, rankNum) => {
-            luaTable += `{\n\t\t\t\t\t\t`;
-            luaTable += `rankTag = "${rank._rankTag}",\n\t\t\t\t\t\t`;
-            luaTable += `description = "${getRankDescription(skillData, rankNum).replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t\t\t`;
-            luaTable += `level = ${rank._levelRequirement},\n\t\t\t\t\t\t`;
-            luaTable += `castTime = ${rank._castTime},\n\t\t\t\t\t\t`;
-            luaTable += `cooldown = ${rank._coolDown},\n\t\t\t\t\t\t`;
-            luaTable += `manaCost = ${rank._manaCost},\n\t\t\t\t\t\t`;
-            luaTable += `healthCost = ${rank._healthCost},\n\t\t\t\t\t\t`;
-            luaTable += `staminaCost = ${rank._staminaCost}\n\t\t\t\t\t},\n\t\t\t\t\t`;
+            if (!skillData) {
+                console.log(`File ${file} doesn't contain any MonoBehaviour`);
+                return;
+            }
+
+            luaTable += `{\n\t\t\t\t`;
+            luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
+            luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
+            luaTable += `ranks = {\n\t\t\t\t\t`;
+
+            skillData._skillRanks.forEach((rank, rankNum) => {
+                luaTable += `{\n\t\t\t\t\t\t`;
+                luaTable += `rankTag = "${rank._rankTag}",\n\t\t\t\t\t\t`;
+                luaTable += `description = "${getRankDescription(skillData, rankNum).replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t\t\t`;
+                luaTable += `level = ${rank._levelRequirement},\n\t\t\t\t\t\t`;
+                luaTable += `castTime = ${rank._castTime},\n\t\t\t\t\t\t`;
+                luaTable += `cooldown = ${rank._coolDown},\n\t\t\t\t\t\t`;
+                luaTable += `manaCost = ${rank._manaCost},\n\t\t\t\t\t\t`;
+                luaTable += `healthCost = ${rank._healthCost},\n\t\t\t\t\t\t`;
+                luaTable += `staminaCost = ${rank._staminaCost}\n\t\t\t\t\t},\n\t\t\t\t\t`;
+            });
+
+            luaTable = luaTable.slice(0, -2); // Remove last comma
+            luaTable += `\t}\n\t\t\t},\n\t\t\t`;
+            console.log(`Added Novice skills to lua table...`);
         });
-
-        luaTable = luaTable.slice(0, -2); // Remove last comma
-        luaTable += `\t}\n\t\t\t},\n\t\t\t`;
-        console.log(`Added Novice skills to lua table...`);
     });
-});
+}
 
-luaTable = luaTable.slice(0, -1)
-luaTable += `}\n\t}\t\n}`
+// Process novice skills and additional skill folders
+processSkillFolder(noviceSkillsDir);
+processSkillFolder(skillScrollDir);
+processSkillFolder(path.join(skillScrollDir, "00_masteries"));
+
+luaTable = luaTable.slice(0, -1);
+luaTable += `}\n\t}\n}`;
 
 fs.mkdirSync(outputDir, { recursive: true });
 fs.writeFileSync(path.join(outputDir, "classes.lua"), luaTable);
