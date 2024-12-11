@@ -4,6 +4,7 @@ const findAssetById = require("./bin/findAssetById");
 const damageTypes = require("./bin/damageTypes");
 
 const inputDir = path.join(__dirname, "outdata", "_class");
+const skillDir = path.join(__dirname, "outdata", "_skill")
 const noviceSkillsDir = path.join(__dirname, "outdata", "_skill", "_noviceskills"); // Novice skills directory
 const skillScrollDir = path.join(__dirname, "outdata", "_skill", "00_skillscroll_skills"); // Skill scroll skills directory
 const outputDir = path.join(__dirname, "luatables");
@@ -86,7 +87,53 @@ function getRankDescription(skill, rank) {
                           .replace("$CASTTIME", skill._skillRanks[rank]._castTime > 0.12
                               ? `<color=yellow>${skill._skillRanks[rank]._castTime.toFixed(2)} sec cast time.</color>`
                               : "<color=yellow>instant cast time.</color>")
-                              .replace("$COOLDWN", `${skill._skillRanks[rank]._coolDown} sec Cooldown`)
+                          .replace("$COOLDWN", `${skill._skillRanks[rank]._coolDown} sec Cooldown`);
+}
+
+// Helper function to determine skill type
+function determineSkillType(skillPath) {
+    const folderName = path.dirname(skillPath).toLowerCase(); // Extract folder name and normalize case
+    if (folderName.includes("passive") || folderName.includes("masteries")) {
+        return "Passive";
+    }
+    return "Active";
+}
+
+function locateSkillFile(guid, skillDir) {
+    // Helper function for recursive search
+    function searchDirectory(directory) {
+        const entries = fs.readdirSync(directory);
+
+        for (const entry of entries) {
+            const entryPath = path.join(directory, entry);
+
+            if (fs.statSync(entryPath).isDirectory()) {
+                // If it's a directory, search recursively
+                const result = searchDirectory(entryPath);
+                if (result) {
+                    return result; // Return the result if found in a subdirectory
+                }
+            } else if (fs.statSync(entryPath).isFile() && entry.endsWith(".json")) {
+                // If it's a file, read and parse JSON
+                const fileContent = fs.readFileSync(entryPath, "utf-8");
+                try {
+                    const jsonData = JSON.parse(fileContent);
+
+                    // Check if the file contains a matching guid
+                    if (jsonData && jsonData[0].guid === guid) {
+                        return entryPath; // Return the file path if found
+                    }
+                } catch (err) {
+                    console.error(`Error parsing JSON in file ${entryPath}:`, err);
+                }
+            }
+        }
+
+        return null; // Return null if not found in this directory
+    }
+
+    // Start the recursive search from the top-level directory
+    return searchDirectory(skillDir);
 }
 
 // Process class skills
@@ -105,14 +152,23 @@ filesList.forEach(file => {
     data._classSkills.forEach(skill => {
         console.log(`Processing skill with guid ${skill.guid}...`);
         const skillData = findAssetById(skill.guid);
-
+    
         if (skillData) {
+            // Locate the skill file based on the guid
+            const skillFilePath = locateSkillFile(skill.guid, skillDir);
+    
+            if (!skillFilePath) {
+                console.error(`Skill file for GUID ${skill.guid} not found.`);
+                return;
+            }
+    
             luaTable += `{\n\t\t\t\t`;
             luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
             luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
             luaTable += `damageType = "${damageTypes[skillData._skillDamageType]}",\n\t\t\t\t`;
+            luaTable += `type = "${determineSkillType(skillFilePath)}",\n\t\t\t\t`; // Pass the located skill file path
             luaTable += `ranks = {\n\t\t\t\t\t`;
-
+    
             skillData._skillRanks.forEach((rank, rankNum) => {
                 luaTable += `{\n\t\t\t\t\t\t`;
                 luaTable += `rankTag = "${rank._rankTag}",\n\t\t\t\t\t\t`;
@@ -125,11 +181,11 @@ filesList.forEach(file => {
                 luaTable += `healthCost = ${rank._healthCost},\n\t\t\t\t\t\t`;
                 luaTable += `staminaCost = ${rank._staminaCost}\n\t\t\t\t\t},\n\t\t\t\t\t`;
             });
-
+    
             luaTable = luaTable.slice(0, -2); // Remove last comma
             luaTable += `\n\t\t\t\t}\n\t\t\t},\n\t\t\t`;
         }
-    });
+    });    
     luaTable += "},\n\t\t";
 
     luaTable = luaTable.slice(0, -6); // Remove last comma
@@ -168,6 +224,7 @@ function processSkillFolder(skillFolderPath) {
             luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
             luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
             luaTable += `damageType = "${damageTypes[skillData._skillDamageType]}",\n\t\t\t\t`;
+            luaTable += `type = "${determineSkillType(path.join(skillFolderPath, folder, file))}",\n\t\t\t\t`;
             luaTable += `ranks = {\n\t\t\t\t\t`;
 
             skillData._skillRanks.forEach((rank, rankNum) => {
