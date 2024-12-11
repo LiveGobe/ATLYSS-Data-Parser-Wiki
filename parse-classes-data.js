@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const findAssetById = require("./bin/findAssetById");
+const damageTypes = require("./bin/damageTypes");
 
 const inputDir = path.join(__dirname, "outdata", "_class");
 const noviceSkillsDir = path.join(__dirname, "outdata", "_skill", "_noviceskills"); // Novice skills directory
@@ -8,8 +9,6 @@ const skillScrollDir = path.join(__dirname, "outdata", "_skill", "00_skillscroll
 const outputDir = path.join(__dirname, "luatables");
 
 const filesList = fs.readdirSync(inputDir);
-const noviceFilesList = fs.readdirSync(noviceSkillsDir); // Get the list of novice skill folders
-const skillScrollFilesList = fs.readdirSync(skillScrollDir); // Get the list of skill scroll folders
 
 let luaTable = "return {\n\t";
 
@@ -110,6 +109,7 @@ filesList.forEach(file => {
             luaTable += `{\n\t\t\t\t`;
             luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
             luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
+            luaTable += `damageType = "${damageTypes[skillData._skillDamageType]}",\n\t\t\t\t`;
             luaTable += `ranks = {\n\t\t\t\t\t`;
 
             skillData._skillRanks.forEach((rank, rankNum) => {
@@ -119,6 +119,7 @@ filesList.forEach(file => {
                 luaTable += `level = ${rank._levelRequirement},\n\t\t\t\t\t\t`;
                 luaTable += `castTime = ${rank._castTime},\n\t\t\t\t\t\t`;
                 luaTable += `cooldown = ${rank._coolDown},\n\t\t\t\t\t\t`;
+                luaTable += `itemCost = "${rank._requiredItem?.guid ? "x" + rank._requiredItemQuantity + " " + findAssetById(rank._requiredItem.guid)._itemName : ""}",\n\t\t\t\t\t\t`;
                 luaTable += `manaCost = ${rank._manaCost},\n\t\t\t\t\t\t`;
                 luaTable += `healthCost = ${rank._healthCost},\n\t\t\t\t\t\t`;
                 luaTable += `staminaCost = ${rank._staminaCost}\n\t\t\t\t\t},\n\t\t\t\t\t`;
@@ -165,6 +166,7 @@ function processSkillFolder(skillFolderPath) {
             luaTable += `{\n\t\t\t\t`;
             luaTable += `name = "${skillData._skillName}",\n\t\t\t\t`;
             luaTable += `description = "${skillData._skillDescription.replaceAll("\n", "\\n").replaceAll("</color>", "</span>").replace(/\<color=(\w*)\>/g, `<span style=\\"color: $1;\\">`)}",\n\t\t\t\t`;
+            luaTable += `damageType = "${damageTypes[skillData._skillDamageType]}",\n\t\t\t\t`;
             luaTable += `ranks = {\n\t\t\t\t\t`;
 
             skillData._skillRanks.forEach((rank, rankNum) => {
@@ -174,6 +176,7 @@ function processSkillFolder(skillFolderPath) {
                 luaTable += `level = ${rank._levelRequirement},\n\t\t\t\t\t\t`;
                 luaTable += `castTime = ${rank._castTime},\n\t\t\t\t\t\t`;
                 luaTable += `cooldown = ${rank._coolDown},\n\t\t\t\t\t\t`;
+                luaTable += `itemCost = "${rank._requiredItem?.guid ? "x" + rank._requiredItemQuantity + " " + findAssetById(rank._requiredItem.guid)._itemName : ""}",\n\t\t\t\t\t\t`;
                 luaTable += `manaCost = ${rank._manaCost},\n\t\t\t\t\t\t`;
                 luaTable += `healthCost = ${rank._healthCost},\n\t\t\t\t\t\t`;
                 luaTable += `staminaCost = ${rank._staminaCost}\n\t\t\t\t\t},\n\t\t\t\t\t`;
