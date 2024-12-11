@@ -85,7 +85,8 @@ function getRankDescription(skill, rank) {
     return rankDescriptor.replace("$SKP", `<color=yellow>${skpValue}</color>`)
                           .replace("$CASTTIME", skill._skillRanks[rank]._castTime > 0.12
                               ? `<color=yellow>${skill._skillRanks[rank]._castTime.toFixed(2)} sec cast time.</color>`
-                              : "<color=yellow>instant cast time.</color>");
+                              : "<color=yellow>instant cast time.</color>")
+                              .replace("$COOLDWN", `${skill._skillRanks[rank]._coolDown} sec Cooldown`)
 }
 
 // Process class skills
