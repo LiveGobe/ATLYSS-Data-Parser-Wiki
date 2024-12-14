@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const findAssetById = require("./bin/findAssetById");
+const calculateEXP = require("./bin/calculateEXP");
 
 const inputDir = path.join(__dirname, "outdata", "_prefab", "_entity", "_npc");
 const outputDir = path.join(__dirname, "luatables");
@@ -98,6 +99,7 @@ function processFile(filePath) {
             luaTable += `name = "${quest._questName}",\n\t\t\t\t`;
             luaTable += `description = "${questDescription}",\n\t\t\t\t`;
             luaTable += `level = ${quest._questLevel},\n\t\t\t\t`;
+            luaTable += `expReward = ${Math.floor(Math.floor(calculateEXP(quest._questLevel)) * quest._questExperiencePercentage)},\n\t\t\t\t`;
             luaTable += `currencyReward = ${quest._questCurrencyReward},\n\t\t\t\t`;
 
             // Add quest item rewards

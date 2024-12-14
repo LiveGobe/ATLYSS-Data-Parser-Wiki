@@ -1,12 +1,10 @@
 {
   "name": "atlyss-data",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node .",
-
     "parse": "node parse-raw-data.js",
-
     "parse:trade": "node parse-trade-items",
     "parse:consumable": "node parse-consumable-items",
     "parse:equipment": "node parse-equipment-items",
@@ -15,7 +13,6 @@
     "parse:locations": "node parse-locations",
     "parse:npcs": "node parse-npc-data",
     "parse:classes": "node parse-classes-data",
-
     "post:trade": "node post-trade-items",
     "post:consumable": "node post-consumable-items",
     "post:equipment": "node post-equipment-items",

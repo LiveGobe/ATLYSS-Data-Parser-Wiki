@@ -52,7 +52,7 @@ async function main() {
 
             if (stat.isDirectory()) {
                 count += countFilesRecursively(filePath);
-            } else if (file.endsWith('.prefab') || file.endsWith('.asset') || file.endsWith('.unity')) {
+            } else if (file.endsWith('.prefab') || file.endsWith('.asset') || file.endsWith('.unity') || file.endsWith(".anim")) {
                 count++;
             }
         });
@@ -69,7 +69,7 @@ async function main() {
             if (stat.isDirectory()) {
                 // If it's a directory, call the function recursively
                 readFilesRecursively(filePath);
-            } else if (file.endsWith('.prefab') || file.endsWith('.asset') || file.endsWith(".unity")) {
+            } else if (file.endsWith('.prefab') || file.endsWith('.asset') || file.endsWith(".unity") || file.endsWith(".anim")) {
                 // If it's a .prefab or .asset file, parse it
                 parseFile(filePath);
                 processedFiles++;
@@ -91,7 +91,7 @@ async function main() {
 
             // Create output directory structure based on input directory
             const relativePath = filePath.replace(inputDir, "");
-            const outputFilePath = path.join(outputDir, relativePath.replace(/\.prefab$|\.asset$/, '.json'));
+            const outputFilePath = path.join(outputDir, relativePath.replace(/\.prefab$|\.asset|\.anim$/, '.json'));
 
             // Create the output directory if it doesn't exist
             fs.mkdirSync(path.dirname(outputFilePath), { recursive: true });
