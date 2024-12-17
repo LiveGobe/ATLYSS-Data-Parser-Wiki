@@ -95,19 +95,11 @@ function processFile(filePath) {
 
         const minPower = data._readonlyDamageRange.x;
         const maxPower = data._readonlyDamageRange.true;
-        let minPowerCap = Math.min(minPower * (1.15 + (data._equipmentLevel * 0.048)), data._maxFloorDamageCap != 0 ? data._maxFloorDamageCap : Infinity);
-        let maxPowerCap = Math.min(maxPower * (1.15 + (data._equipmentLevel * 0.062)), data._maxCeilingDamageCap != 0 ? data._maxCeilingDamageCap : Infinity);
-        if (data._equipmentLevel <= 4) {
-            minPowerCap = Math.min(minPower * 1.85, data._maxFloorDamageCap != 0 ? data._maxFloorDamageCap : Infinity);
-            maxPowerCap = Math.min(maxPower * 1.25, data._maxCeilingDamageCap != 0 ? data._maxCeilingDamageCap : Infinity);
-        }
 
         luaTable += `weapon = {\n\t\t\t`;
         luaTable += `element = "${element}",\n\t\t\t`;
         luaTable += `minBase = ${Math.trunc(minPower)},\n\t\t\t`;
         luaTable += `maxBase = ${Math.trunc(maxPower)},\n\t\t\t`;
-        luaTable += `minMax = ${Math.trunc(minPowerCap)},\n\t\t\t`;
-        luaTable += `maxMax = ${Math.trunc(maxPowerCap)},\n\t\t`;
         luaTable += `},\n\t\t`;
     } else if (data._blockDamageThreshold) luaTable += `blockDamage = ${data._blockDamageThreshold},\n\t\t`;
 
