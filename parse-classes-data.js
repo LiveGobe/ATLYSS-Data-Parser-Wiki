@@ -9,6 +9,8 @@ const noviceSkillsDir = path.join(__dirname, "outdata", "_skill", "_noviceskills
 const skillScrollDir = path.join(__dirname, "outdata", "_skill", "00_skillscroll_skills"); // Skill scroll skills directory
 const outputDir = path.join(__dirname, "luatables");
 
+const excludedSkills = ["Geyser", "Flak", "Talus"];
+
 const filesList = fs.readdirSync(inputDir);
 
 let luaTable = "return {\n\t";
@@ -215,7 +217,7 @@ function processSkillFolder(skillFolderPath) {
         skillFiles.forEach(file => {
             const skillData = require(path.join(skillFolderPath, folder, file))[0]?.MonoBehaviour;
 
-            if (!skillData) {
+            if (!skillData || excludedSkills.includes(skillData._skillName)) {
                 console.log(`File ${file} doesn't contain any MonoBehaviour`);
                 return;
             }
