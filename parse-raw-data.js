@@ -211,6 +211,7 @@ async function main() {
         fs.writeFileSync("gameVersion.json", JSON.stringify({ gameVersion }, null, 2));
         console.log("Data version is undefined. Game version has been written to gameVersion.json.");
     } else {
+        fs.writeFileSync("gameVersion.json", JSON.stringify({ gameVersion }, null, 2));
         const comparison = compareVersions(dataVersion, gameVersion);
 
         if (comparison < 0) {
