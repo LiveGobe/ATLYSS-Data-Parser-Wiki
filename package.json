@@ -1,6 +1,6 @@
 {
   "name": "atlyss-data",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "main": "index.js",
   "scripts": {
     "start": "node .",

@@ -215,6 +215,8 @@ function processSkillFolder(skillFolderPath) {
         }
 
         skillFiles.forEach(file => {
+            if (file.endsWith("_0.json")) return;
+
             const skillData = require(path.join(skillFolderPath, folder, file))[0]?.MonoBehaviour;
 
             if (!skillData || excludedSkills.includes(skillData._skillName)) {
